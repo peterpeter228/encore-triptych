@@ -1,0 +1,7 @@
+2026-10-18 UTC
+node --check static/app.js: PASS
+sh -n start.sh: PASS
+python -m compileall -q app.py: PASS
+Python backend suite: 13 passed, 1 upstream AnyIO deprecation warning, 0.88s
+Frontend retry VM regressions: 4 passed
+These are automated checks, not substitutes for browser or Windows testing.

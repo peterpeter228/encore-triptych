@@ -1,0 +1,4 @@
+PASS distinct successful creations use fresh IDs.
+PASS uncertain join close/reopen preserves request ID, draft and photo; retry uses one slot.
+PASS joined URL canonical before failed upload; draft and photo survive reopen.
+PASS partial creation locks saved metadata and retains retry ID; success resets ID and controls.

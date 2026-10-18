@@ -1,0 +1,13 @@
+{
+  "project": "安可三联 / Encore Triptych",
+  "updated_date_utc": "2026-10-18",
+  "stage": "private_local_mvp",
+  "delivery": "source_code_and_local_startup",
+  "runtime": {"python": "3.12+", "server": "FastAPI/Uvicorn", "database": "SQLite", "image_processing": "Pillow", "default_url": "http://127.0.0.1:8765", "single_process_only": true},
+  "startup": {"unix": "sh start.sh", "windows": "start.cmd", "windows_tested": false, "initial_dependency_install_requires_network": true},
+  "implemented": ["single_person_image_text_card", "maximum_three_contribution_slots", "separate_owner_view_invite_contributor_capabilities", "invite_rotation_and_revocation", "individual_withdrawal", "owner_event_deletion", "local_media_cleanup", "image_validation_resize_exif_removal", "restart_persistence", "idempotent_create_and_join"],
+  "verification": {"backend_tests": "passed", "backend_test_count": 13, "backend_result": "docs/test-results/backend-pytest.txt", "final_browser_qa": "pending_root_confirmation", "windows_startup": "untested"},
+  "constraints": {"public_deployment": false, "same_computer_invitation_only": true, "wallet_or_token": false, "payments": false, "user_recruitment": false, "profitability_validated": false, "product_market_fit_validated": false},
+  "sensitive_runtime_exclusions": ["data/", ".venv/", "management_keys", "private_invitation_tokens", "retry_request_ids"],
+  "next_action": "Complete browser QA, then update status only from verified results; deliver source without runtime data."
+}
