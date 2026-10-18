@@ -46,23 +46,44 @@ def analyzed_cards(signals):
     """Join only exact protocol identities; two metrics are not two independent sources."""
     groups = {}
     for signal in signals:
-        url = signal.get('url', '')
         chains = signal.get('chains')
-        if (signal.get('source_id') in ('defillama_fees', 'defillama_revenue')
-                and isinstance(url, str) and url.startswith('https://defillama.com/protocol/')
-                and isinstance(chains, list) and chains and all(isinstance(c, str) for c in chains)):
-            groups.setdefault((url, tuple(sorted(chains))), []).append(signal)
+        if (signal.get('source_id') not in ('defillama_fees', 'defillama_revenue')
+                or not isinstance(chains, list) or not chains
+                or not all(isinstance(c, str) and c for c in chains)):
+            continue
+        # Provider entity IDs are collector-normalized, never external-import authority.
+        entity = signal.get('entity_id')
+        identity = None
+        if (isinstance(entity, str) and entity.strip() and len(entity) <= 500
+                and signal.get('identity_confidence') != 'name_fallback'
+                and signal.get('identity_kind') != 'name'):
+            identity = 'entity:' + entity
+        else:
+            candidate = signal.get('canonical_url') or signal.get('url', '')
+            try:
+                parsed = urlsplit(candidate)
+                slug = parsed.path.removeprefix('/protocol/')
+                if (parsed.scheme == 'https' and parsed.netloc == 'defillama.com'
+                        and parsed.path.startswith('/protocol/') and slug and '/' not in slug
+                        and not parsed.query and not parsed.fragment):
+                    identity = 'canonical:' + candidate
+            except (TypeError, ValueError):
+                pass
+        # Generic overview/API links are never identities, even when chains match.
+        if identity is not None:
+            groups.setdefault((identity, tuple(sorted(set(chains)))), []).append(signal)
     merged_by_id = {}
     consumed = set()
-    for (url, chains), rows in groups.items():
+    for (identity, chains), rows in groups.items():
         # Ambiguous duplicates are deliberately not merged.
         if len(rows) != 2 or {r['source_id'] for r in rows} != {'defillama_fees', 'defillama_revenue'}:
             continue
         ordered = sorted(rows, key=lambda r: r['source_id'])
         merged = deepcopy(ordered[0])
-        merged.update(id='protocol-' + hashlib.sha256((url + '|' + '|'.join(chains)).encode()).hexdigest()[:24],
+        merged.update(id='protocol-' + hashlib.sha256((identity + '|' + '|'.join(chains)).encode()).hexdigest()[:24],
                       source_id='defillama_combined', source_ids=[r['source_id'] for r in ordered],
-                      metrics_type='protocol_metrics', source_refs=list(dict.fromkeys(r['url'] for r in ordered)),
+                      metrics_type='protocol_metrics', source_refs=list(dict.fromkeys(ref for r in ordered for ref in
+                          (r.get('canonical_url'), r.get('url')) if ref)),
                       evidence_note='Fee and revenue observations from the same provider, not independent corroboration.',
                       metrics={'net_profit_usd': None}, per_metric_provenance={})
         for row in ordered:
@@ -88,7 +109,7 @@ def analyzed_cards(signals):
         signal = merged_by_id.get(raw['id'], raw)
         card = business().analyze_signal(signal)
         card.update({key: signal.get(key) for key in (
-            'name', 'category', 'chain', 'chains', 'source_id', 'evidence_status', 'observed_at', 'metrics_type')})
+            'name', 'category', 'chain', 'chains', 'source_id', 'evidence_status', 'observed_at', 'metrics_type', 'entity_id', 'canonical_url')})
         for key in ('source_ids', 'per_metric_provenance', 'evidence_note'):
             if key in signal:
                 card[key] = deepcopy(signal[key])

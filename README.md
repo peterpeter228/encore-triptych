@@ -52,3 +52,6 @@ Backend tests use explicit injected fixtures, never production fallback data. Br
 浏览器实际点击验证了失败提示、真实历史缓存、筛选、合并指标来源、未知成本模拟、导入校验、持久化和Markdown/PNG导出；桌面及500px窗口已测。浏览器所在运行环境的实时联网仍失败，即使本轮经授权临时沿用现有代理也未成功。缓存模式通过不能替代实时联网通过。临时测试进程已停止，代理配置未打包或长期保存。
 
 未验证：Windows启动、精确320/375px、真实钱包/收费/公开部署、Superteam鉴权接口。参见 docs/test-results/ALPHA_BROWSER_QA.md。该程序是研究工具，不是已经盈利的Web3产品。历史照片卡验收归档在 docs/history，不是当前版本的测试。
+
+## 0.2.1 修正
+实际扫描发现点号名称的项目链接与身份识别缺口，已补齐稳定实体ID，拒绝按公共API总览链接或名称回退合并；pump.fun与Mobile保持独立，费用/收入仅在同一实体中合并。Optimism的OP Mainnet别名也已规范化。本轮60条观测现去重为44条研究线索，早期47是历史版本结果。针对修复的实际浏览器回归见 docs/test-results/ALPHA_IDENTITY_QA.md；65项扫描器测试和21项后端测试通过。

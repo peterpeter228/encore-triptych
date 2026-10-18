@@ -1,5 +1,5 @@
 # Shared research engine
 
-Vendored byte-identical radar modules from peterpeter228/blockchain-opportunity-radar commit 8e1029f836abf18335156253d0e8be3100ca5351. This makes the private workbench independently runnable without GitHub credentials.
+Vendored byte-identical radar modules from peterpeter228/blockchain-opportunity-radar commit 1617d61336d6b1791d1d3a42360dcb2c21e6d7eb. Private read-only data collection and evidence assessment; no credentials or financial execution included.
 
-Only __init__.py, core.py, business.py and live.py are used. No duplicate decision implementation, paid API key, wallet action or production credential is included. Refresh all four together and verify byte identity after updates.
+Version0.3.1 adds stable protocol identities and OP Mainnet alias handling. Refresh all four modules together and verify byte identity after changes.

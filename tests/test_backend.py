@@ -253,3 +253,38 @@ def test_exact_protocol_merge_typed_metrics_and_freshness(client, monkeypatch):
     bundle['signals'][1]['url'] = 'https://defillama.com/protocol/other'
     stub(monkeypatch, bundle)
     assert len(client.post('/api/scan', json={}).json()['cards']) == 2
+
+
+def test_protocol_identity_never_uses_shared_api_overview():
+    shared = 'https://api.llama.fi/overview/fees'
+    fee = {'id': 'pump-fees', 'name': 'pump.fun', 'source_id': 'defillama_fees',
+           'url': shared, 'chains': ['solana'], 'metrics': {'fees_24h_usd': 100}}
+    revenue = {'id': 'mobile-revenue', 'name': 'pump.fun Mobile', 'source_id': 'defillama_revenue',
+               'url': shared, 'chains': ['solana'], 'metrics': {'revenue_24h_usd': 20}}
+    assert len(module.analyzed_cards([fee, revenue])) == 2
+    # Explicit provider identities remain distinct despite a shared legacy URL.
+    fee['entity_id'] = 'defillama:pump.fun'
+    revenue['entity_id'] = 'defillama:pump.fun-mobile'
+    assert len(module.analyzed_cards([fee, revenue])) == 2
+    same_revenue = {**revenue, 'id': 'pump-revenue', 'name': 'pump.fun', 'entity_id': fee['entity_id']}
+    grouped = module.analyzed_cards([fee, same_revenue, revenue])
+    assert len(grouped) == 2
+    merged = next(card for card in grouped if card['source_id'] == 'defillama_combined')
+    assert merged['monetization']['metrics']['fees_24h_usd'] == 100
+    assert merged['monetization']['metrics']['revenue_24h_usd'] == 20
+    # Legacy rows may merge only on an actual specific protocol URL, including dots.
+    fee.pop('entity_id')
+    same_revenue.pop('entity_id')
+    fee['url'] = same_revenue['url'] = 'https://defillama.com/protocol/pump.fun'
+    assert len(module.analyzed_cards([fee, same_revenue])) == 1
+    fee['url'] = same_revenue['url'] = 'https://defillama.com/protocol/'
+    assert len(module.analyzed_cards([fee, same_revenue])) == 2
+
+
+def test_name_fallback_is_not_trusted_provider_identity():
+    base = {'name': 'Same display name', 'entity_id': 'defillama:name:Same%20display%20name',
+            'identity_kind': 'name', 'identity_confidence': 'name_fallback',
+            'url': 'https://api.llama.fi/overview/fees', 'chains': ['solana'], 'metrics': {}}
+    assert len(module.analyzed_cards([
+        {**base, 'id': 'one', 'source_id': 'defillama_fees'},
+        {**base, 'id': 'two', 'source_id': 'defillama_revenue'}])) == 2

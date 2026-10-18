@@ -13,7 +13,7 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit, parse_qsl
+from urllib.parse import urlsplit, parse_qsl, quote
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 from uuid import uuid4
 
@@ -30,6 +30,7 @@ LIGHTWEIGHT_CATEGORIES = frozenset({
     'portfolio tracker', 'coins tracker', 'consumer', 'consumer app',
     'ai agents', 'developer tools', 'payments', 'identity & reputation', 'dca tools',
 })
+CHAIN_ALIASES = {'avax': 'avalanche', 'op mainnet': 'optimism'}
 PRIMARY_CHAINS = ('solana', 'base', 'avalanche', 'ethereum', 'arbitrum', 'optimism')
 _LLAMA = 'https://api.llama.fi/overview/fees?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true&dataType='
 SOURCES = (
@@ -133,8 +134,8 @@ def _normalize(source, payload, stats=None):
         if not isinstance(raw_chains, list):
             stats['malformed_count'] += 1
             continue
-        chains = sorted(set(c.lower() for c in raw_chains if isinstance(c, str)))
-        chains = ['avalanche' if c == 'avax' else c for c in chains]
+        chains = sorted({CHAIN_ALIASES.get(c.lower(), c.lower())
+                         for c in raw_chains if isinstance(c, str)})
         if not set(chains).intersection(PRIMARY_CHAINS):
             stats['non_primary_chain_count'] += 1
             continue
@@ -143,11 +144,21 @@ def _normalize(source, payload, stats=None):
         if llama and category_key and category_key not in LIGHTWEIGHT_CATEGORIES:
             stats['excluded_count'] += 1
             continue
-        identity = (row.get('slug') or row.get('defillamaId') or row.get('name')) if llama else row.get('tokenAddress')
-        if not isinstance(identity, (str, int)) or isinstance(identity, bool):
+        identity_kind = None
+        identity = None
+        for field in (('slug', 'defillamaId', 'name') if llama else ('tokenAddress',)):
+            value = row.get(field)
+            if isinstance(value, (str, int)) and not isinstance(value, bool) and str(value).strip():
+                identity_kind, identity = field, str(value).strip()
+                break
+        if identity is None:
             stats['malformed_count'] += 1
             continue
-        key = str(identity) + ':' + ','.join(chains)
+        namespace = 'defillama' if llama else 'dexscreener'
+        entity_id = namespace + ':' + identity_kind + ':' + quote(identity, safe='')
+        if not llama:
+            entity_id += ':' + ','.join(chains)
+        key = entity_id + ':' + ','.join(chains)
         if key in seen:
             stats['duplicate_count'] += 1
             continue
@@ -160,21 +171,27 @@ def _normalize(source, payload, stats=None):
             metrics[kind + '_7d_usd'] = _number(row.get('total7d'))
             metrics['change_7d_percent'] = _number(row.get('change_7d'))
             # Do not replace change_7d with change_1d or infer growth from cumulative amounts.
-            slug = _text(row.get('slug'))
-            url = 'https://defillama.com/protocol/' + slug if slug and all(c.isalnum() or c in '-_' for c in slug) else source['url']
+            slug = row.get('slug')
+            slug = slug.strip() if isinstance(slug, str) else None
+            canonical_url = ('https://defillama.com/protocol/' + quote(slug, safe='')
+                             if slug and slug not in ('.', '..') else None)
+            url = canonical_url or source['url']
             category = provider_category if category_key else None
             name = _text(row.get('name')) or str(identity)[:240]
         else:
             kind = 'paid_promotion' if sid.endswith('boosts') else 'token_profile'
             metrics['boost_amount'] = _number(row.get('amount')) if kind == 'paid_promotion' else None
             metrics['boost_total_amount'] = _number(row.get('totalAmount')) if kind == 'paid_promotion' else None
-            url = _safe_url(row.get('url')) or source['url']
+            canonical_url = _safe_url(row.get('url'))
+            url = canonical_url or source['url']
             category = kind
             name = _text(row.get('name')) or str(identity)[:240]
         tier = 'unknown_category_secondary' if llama and not category_key else 'primary'
         stats['unknown_category_count' if tier == 'unknown_category_secondary' else 'primary_count'] += 1
         result.append({
-            'selection_tier': tier,
+            'selection_tier': tier, 'entity_id': entity_id,
+            'identity_kind': identity_kind, 'canonical_url': canonical_url,
+            'identity_confidence': 'name_fallback' if identity_kind == 'name' else 'provider_identifier',
             'id': sid + ':' + hashlib.sha256(key.encode()).hexdigest()[:20],
             'name': name, 'chain': chains[0] if len(chains) == 1 else 'multichain', 'chains': chains,
             'category': category, 'source_id': sid, 'url': url, 'metrics': metrics,

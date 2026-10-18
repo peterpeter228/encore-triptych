@@ -17,12 +17,12 @@
   "commercial_validation": "unproven",
   "revenue_claim": null,
   "source_failure_policy": "report_error_or_timestamped_stale_cache_never_mock",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "tests": {
-    "scanner_unit": 62,
+    "scanner_unit": 65,
     "scanner_cli": 14,
     "scanner_experiment_cli": 7,
-    "backend": 19,
+    "backend": 21,
     "browser": "actual_click_paths_and_genuine_stale_cache_passed",
     "native_browser_fresh_network": "failed_even_with_authorized_temporary_proxy",
     "collector_fresh_network": "four_public_sources_success",
@@ -31,5 +31,7 @@
   },
   "live_evidence": "docs/observations/live-final-20261018.json",
   "qa_report": "docs/test-results/ALPHA_BROWSER_QA.md",
-  "next_action": "Use as private research infrastructure; fresh native-browser network remains an environment gap. Research independently verified products before any new build. No public or financial actions."
+  "next_action": "Use as private research infrastructure; fresh native-browser network remains an environment gap. Research independently verified products before any new build. No public or financial actions.",
+  "identity_patch": "Stable protocol IDs and specific protocol URLs; no shared API/name-only merge. OP Mainnet chain alias corrected.",
+  "current_research_cards": 44
 }
