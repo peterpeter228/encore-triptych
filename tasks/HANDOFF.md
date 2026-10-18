@@ -9,7 +9,7 @@
 ## 已交付
 
 - `app.py`：事件创建、私密读取、三人协作上限、个人修改与撤回、主办者整份删除、邀请轮换/撤销、图片处理和本地持久化。
-- `static/`：前端源文件，由独立前端工作流实现，浏览器验收仍在进行。
+- `static/`：前端源文件，已完成有明确范围的本地桌面实操验收，详见浏览器报告。
 - `start.sh` / `start.cmd`：创建虚拟环境、安装依赖、启动本地服务。
 - `requirements.txt` / `requirements-dev.txt`：运行和测试依赖。
 - `tests/test_backend.py`、`docs/test-results/backend-pytest.txt`：后端测试及本次运行结果。
@@ -19,7 +19,7 @@
 
 后端测试：13 项通过，最新隔离运行输出已保存；一条上游测试工具弃用警告，不是测试失败。测试使用临时目录与合成图片，不改动正在运行应用的 `data/`。
 
-最终浏览器 QA：**待确认**。不要在浏览器 QA 负责人给出最终结果前，写成“全部用户旅程通过”或“已完整验收”。
+本地桌面浏览器 QA：**所列流程通过**。手机精确尺寸、第三个独立浏览器上下文、Windows 和互联网分享未测，不能写成全平台完整验收。
 
 Windows：`start.cmd` 未在真实 Windows 环境实测。
 
@@ -35,7 +35,7 @@ Windows：`start.cmd` 未在真实 Windows 环境实测。
 
 ## 下一个明确步骤
 
-1. 收集最终浏览器测试结果，按实际证据更新状态，必要时修复后重测。
+1. 查看 docs/test-results/browser-qa.md 的已测流程与未验证项；今后修改对应流程后必须重测。
 2. 打包/同步仅包含源码和文档的交付，排除运行数据和密钥。
 3. 如需 Windows 支持承诺，在 Windows 实际启动并运行最短创建、加入、导出、删除流程。
 4. 跨设备试用或公开部署是新范围：先取得明确授权，再处理 HTTPS、托管、访问控制、配额、备份与删除政策、安全审查。当前不应部署。
@@ -43,3 +43,6 @@ Windows：`start.cmd` 未在真实 Windows 环境实测。
 ## 权限请求记录
 
 后端实现及本轮文档接手未发起 `require_escalated` 或其他审批请求。无法将其他工作流的审批编号归因到本后端任务。
+
+## 2026-10-18 final scoped checkpoint
+Desktop actual-click QA complete within documented scope; see docs/test-results/browser-qa.md. Four retry defects fixed and covered by tests/frontend_retry_regression.cjs. All synthetic browser records cleaned. Mobile exact widths, Windows and third independent browser context remain unverified. Do not label this public/commercial production readiness. Source checkpoint before evidence: 0a424d2fe354af146b1a83034039ed1e99be3865.

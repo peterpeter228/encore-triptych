@@ -1,0 +1,132 @@
+[
+  {
+    "check": "create",
+    "actual": 201,
+    "pass": true
+  },
+  {
+    "check": "public excludes owner",
+    "actual": false,
+    "pass": true
+  },
+  {
+    "check": "unknown key",
+    "actual": 403,
+    "pass": true
+  },
+  {
+    "check": "unauth event",
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "check": "upload",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "unauth image",
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "check": "view image",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "oversize",
+    "actual": 413,
+    "pass": true
+  },
+  {
+    "check": "invalid image",
+    "actual": 400,
+    "pass": true
+  },
+  {
+    "check": "previous image preserved",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "race two accepted",
+    "actual": 2,
+    "pass": true
+  },
+  {
+    "check": "race six full",
+    "actual": 6,
+    "pass": true
+  },
+  {
+    "check": "participant cannot delete event",
+    "actual": 403,
+    "pass": true
+  },
+  {
+    "check": "participant cannot edit owner",
+    "actual": 403,
+    "pass": true
+  },
+  {
+    "check": "own withdrawal",
+    "actual": 204,
+    "pass": true
+  },
+  {
+    "check": "withdraw removes capability",
+    "actual": 403,
+    "pass": true
+  },
+  {
+    "check": "old invite invalid",
+    "actual": 404,
+    "pass": true
+  },
+  {
+    "check": "new invite valid",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "restart persisted event",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "restart persisted media",
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "check": "referrer header",
+    "actual": "no-referrer",
+    "pass": true
+  },
+  {
+    "check": "owner delete",
+    "actual": 204,
+    "pass": true
+  },
+  {
+    "check": "old event deleted",
+    "actual": 404,
+    "pass": true
+  },
+  {
+    "check": "old invite deleted",
+    "actual": 404,
+    "pass": true
+  },
+  {
+    "check": "old media deleted",
+    "actual": 404,
+    "pass": true
+  },
+  {
+    "check": "media disk cleaned",
+    "actual": 0,
+    "pass": true
+  }
+]
