@@ -1,65 +1,54 @@
-# 安可三联 / Encore Triptych
+# Triptych Alpha
 
-一个图片＋文字的私人本地 MVP：一个人先得到自己的纪念卡，再邀请最多两人补充视角，形成可导出的共同作品。
+Private, local full-stack Web3 research workbench. The former static event souvenir product has been replaced in place with three stages: source signals → evidence-aware opportunity decisions → scenario and build-spec export.
 
-**当前交付是源代码和本地启动方式，不是已公开部署的网站。没有钱包、代币、NFT、支付或对外招募；也没有验证盈利、留存或真实用户传播。**
+## Run locally
 
-## 启动
+Python 3.11+:
 
-需要 Python 3.12 或更新版本。启动脚本会创建项目内 `.venv` 并从 Python 包仓库安装 `requirements.txt` 中的依赖，首次启动需要网络。应用运行期间不使用外部服务。
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python app.py
+```
 
-### Windows
+Open http://127.0.0.1:8765. Windows users can use `start.cmd`; Unix users can use `./start.sh`. The server binds only to loopback. Do not expose it publicly or through a tunnel. `PORT` changes the local port; `TRIPTYCH_ALPHA_DATA_DIR` optionally changes the private data directory.
 
-解压项目后双击 `start.cmd`。等待依赖安装完成，在浏览器打开：
+Click the scan button to request real public data. An empty first run is intentional. Failed or blocked requests show source errors, not invented opportunities. A source cache is reused for five minutes; stale fallback preserves the original fetched time. Superteam/Mobula credential requirements are shown rather than bypassed. No API keys or paid accounts are required or requested by this build.
 
-http://127.0.0.1:8765
+## What is implemented
 
-保持命令窗口开启；按 Ctrl+C 停止服务。**Windows 启动脚本尚未在 Windows 系统实测。** 如提示找不到 Python，请安装 Python 3.12+，重新运行。脚本选择系统的 `py -3` 或 `python`，不会自动安装 Python。
+- Fixed-host, bounded read-only source collection via the vendored radar package.
+- Local SQLite snapshots, append-only scan-run history and imported research leads in `alpha-data/` (not old `data/`).
+- Explainable evidence cards with unknowns, provenance and build gates.
+- Explicit revenue-scenario arithmetic. Fees are not revenue; revenue is not net profit; paid boosts are advertising, not organic demand.
+- Local Muse JSON import, strictly validated and always unverified. No public webhook or remote fetching of imported links.
+- Downloadable Markdown implementation brief. This is a research artifact, not automated project creation or approval to deploy.
 
-### macOS / Linux
+No signing, wallet access, trading, payments, token issuance, gambling, paid spending, account creation, public deployment or bounty submission is implemented. No revenue or commercial validation is claimed. DEXScreener-derived data is for private internal research here; review source licenses before any redistribution or product launch.
 
-在项目目录运行：
+## API
 
-    sh start.sh
+See [architecture](docs/PRD_AND_ARCHITECTURE.md) and [handoff](tasks/HANDOFF.md). All endpoints require a localhost Host and same-origin browser requests. Scenario inputs are `volume`, `fee_bps`, `conversion` (captured fraction), `share` (retained revenue fraction) and `costs`, plus optional `period` and `currency`. Missing assumptions remain unknown; missing cost data keeps net profit null.
 
-然后打开 http://127.0.0.1:8765。按 Ctrl+C 停止。启动脚本依赖系统 `python3` 指向 Python 3.12+。
+Example inert import:
 
-已经准备好依赖时，也可以直接运行：
+```json
+{"title":"Public research lead","source_refs":["https://example.org/research"],"category":"data analytics","claims":["Unverified claim for independent checking"]}
+```
 
-    python app.py
+## Test
 
-默认仅监听 `127.0.0.1:8765`。使用 `PORT` 环境变量可以更换端口；`ENCORE_DATA_DIR` 可以指定另一个私人数据目录。
+```sh
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pytest tests/test_backend.py -q
+```
 
-## 可以体验什么
+Backend tests use explicit injected fixtures, never production fallback data. Browser evidence and live-run limitations are recorded separately when available. The original souvenir implementation remains recoverable from Git commit `8f41529ecb0e7589b4c874518d03587510d9c69e`; this application never deletes its prior data.
 
-1. 输入活动名、日期、主办者昵称和自己的图文，生成一份个人纪念卡。可先只写文字，不必上传私人照片；首页插画仅作虚构演示。
-2. 复制邀请链接，在同一台电脑的另一个浏览器或无痕窗口打开，模拟朋友加入。最多三份贡献；每个人拥有自己的修改和撤回权限。
-3. 查看共同作品、导出图片、更新邀请链接；主办者可以删除整份纪念册。
-4. 停止再启动服务，原有记录仍保存在本机。
+## 本轮验收结论（2026-10-18）
+真实采集进程成功访问4个公共源，保存60条原始观测；按同一协议及相同链集合合并为47张研究卡，不把费用/收入当两个独立项目。来源证据位于 docs/observations/live-final-20261018.json。62项扫描器单元测试、14项CLI验收、7项实验CLI回归和19项后端测试通过。
 
-**邀请链接目前只能在运行此服务的同一台电脑上使用。** 发给朋友或在手机上点击 `127.0.0.1`，不会连到你的电脑。此版本没有开启局域网或公网访问，也不应自行用公共隧道暴露私人数据。跨设备协作需要另行设计、审查并授权部署。
+浏览器实际点击验证了失败提示、真实历史缓存、筛选、合并指标来源、未知成本模拟、导入校验、持久化和Markdown/PNG导出；桌面及500px窗口已测。浏览器所在运行环境的实时联网仍失败，即使本轮经授权临时沿用现有代理也未成功。缓存模式通过不能替代实时联网通过。临时测试进程已停止，代理配置未打包或长期保存。
 
-## 私密链接、照片与删除
-
-- 管理链接相当于密码。不要把主办者或贡献者管理链接当成普通邀请链接分享。链接持有人可以行使其中的权限。
-- 浏览器在本机保存管理密钥；清除浏览器数据或丢失管理链接后，没有账号找回服务。
-- 邀请链接、只读链接和管理链接权限分开；撤销邀请仅阻止后续加入，不会撤销已有参与者或已发出的只读访问。
-- 默认数据位于 `data/`，包括 SQLite 数据库和处理后的照片。不要上传、提交或分享整个 `data/` 目录。
-- 仅在用户选择文件后才上传到本地后端。允许 JPG、PNG、WebP，最多 8 MiB、2000 万像素；服务端校验、缩放并重新编码，去除 EXIF 信息。首页演示图不属于真实纪念册。
-- 个人撤回会删除自己的贡献和对应本地照片；主办者删除纪念册会删除整份记录及其照片。已下载的导出图、截图和外部备份无法撤回。数据库删除不是取证级磁盘擦除。
-- 这不是身份验证系统：三个位置代表三份贡献，不保证来自三个不同自然人。
-
-## 测试与交付状态
-
-后端自动化测试覆盖权限隔离、并发加入、重试幂等性、邀请撤销、上传校验与 EXIF 清除、重启恢复和删除清理。最新结果见 [docs/test-results/backend-pytest.txt](docs/test-results/backend-pytest.txt)。
-
-**本地桌面实操已通过个人创建、双人加入、图片导出、更新邀请后的参与者刷新、撤回、删除、连续新建与服务重启恢复。** 详见 [浏览器验收记录](docs/test-results/browser-qa.md)。另有 13 项后端测试、4 项前端重试回归和 26 项独立接口检查通过。
-
-仍未验证：Windows 启动、手机尺寸与真机、第三个独立浏览器上下文以及互联网分享。三人名额并发限制已用接口测试验证，不能替代三人浏览器实操。这是带明确边界的本地体验版，不是正式上线验收。
-
-开发测试：
-
-    python -m pip install -r requirements-dev.txt
-    python -m pytest tests/test_backend.py -q
-
-API、权限模型和已知技术边界见 [BACKEND.md](BACKEND.md)。产品范围见 [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md)。接手说明见 [tasks/HANDOFF.md](tasks/HANDOFF.md)。
+未验证：Windows启动、精确320/375px、真实钱包/收费/公开部署、Superteam鉴权接口。参见 docs/test-results/ALPHA_BROWSER_QA.md。该程序是研究工具，不是已经盈利的Web3产品。历史照片卡验收归档在 docs/history，不是当前版本的测试。
